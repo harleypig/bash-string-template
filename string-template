@@ -1,0 +1,91 @@
+#!/bin/bash
+
+[[ ${BASH_SOURCE[0]} == "$0" ]] || {
+  echo "this script must not be sourced." >&2
+  return 1
+}
+
+##############################################################################
+
+declare selfname
+selfname="$(basename "$0")"
+
+warn() { printf '%s\n' "$*" >&2; }
+
+die() {
+  (($#)) && warn "$*"
+  exit 1
+}
+
+debug() {
+  ((DEBUG)) || return 0
+  warn "DEBUG:$selfname: $*"
+}
+
+usage() {
+  die "
+
+Usage: $selfname '/path/to/%PRJNAME%/'
+
+$selfname takes a string as a parameter and looks
+for occurrences of '%WORD%', replacing that
+substring with the value of WORD, if it exists in
+the environment and prints the results to STDOUT.
+
+Example:
+
+  PRJNAME=test123 $selfname '/path/to/%PRJNAME%
+
+will echo to STDOUT '/path/to/test123'
+
+$*
+"
+}
+
+[[ -z $1 ]] && usage "!!! $selfname requires a string to process"
+
+##############################################################################
+
+declare s="$*"
+declare rc=0
+
+# ???: Make DELIM and CHECKVAR parameters? DELIM will have to be a single
+#      character.
+
+declare DELIM='%'
+#DELIM='[]'
+declare CHECKVAR='!!EMPTY!!'
+
+declare regex="${DELIM}([^$DELIM]*)$DELIM"
+
+##############################################################################
+
+# ???: Can we do this once and check after while loop?
+#      Does not appear to be so.
+
+[[ $s =~ $regex ]] || {
+  rc=$?
+  ((rc > 2)) && die 'Unknown error from =~ in fill_template.'
+  ((rc == 2)) && die "Syntax error in fill_template's regex."
+  ((rc == 1)) && die "No %WORD%'s found in string '%s'."
+}
+
+while [[ $s =~ $regex ]]; do
+  debug "    Match: ${BASH_REMATCH[0]}"
+  debug "1st group: ${BASH_REMATCH[1]}"
+  debug "    value: ${!BASH_REMATCH[1]:-$CHECKVAR}"
+
+  # If the variable does not exist in the environment, then warn
+  # otherwise replace with nothing.
+
+  declare value
+
+  value=$(printenv "${BASH_REMATCH[1]}") || {
+    warn "Variable '${BASH_REMATCH[1]}' does not exist in the environment"
+    value="!!${BASH_REMATCH[1]}!!"
+  }
+
+  s=${s//${BASH_REMATCH[0]}/$value}
+done
+
+printf '%s' "$s"
