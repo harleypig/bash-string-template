@@ -49,19 +49,13 @@ $*
 declare s="$*"
 declare rc=0
 
-# ???: Make DELIM and CHECKVAR parameters? DELIM will have to be a single
-#      character.
+# ???: Make DELIM a parameter? DELIM will have to be a single character.
 
 declare DELIM='%'
 #DELIM='[]'
-declare CHECKVAR='!!EMPTY!!'
-
 declare regex="${DELIM}([^$DELIM]*)$DELIM"
 
 ##############################################################################
-
-# ???: Can we do this once and check after while loop?
-#      Does not appear to be so.
 
 [[ $s =~ $regex ]] || {
   rc=$?
@@ -73,7 +67,6 @@ declare regex="${DELIM}([^$DELIM]*)$DELIM"
 while [[ $s =~ $regex ]]; do
   debug "    Match: ${BASH_REMATCH[0]}"
   debug "1st group: ${BASH_REMATCH[1]}"
-  debug "    value: ${!BASH_REMATCH[1]:-$CHECKVAR}"
 
   # If the variable does not exist in the environment, then warn
   # otherwise replace with nothing.
