@@ -15,6 +15,14 @@ Example:
 
 will echo to STDOUT '/path/to/test123'
 
+#### Note
+
+If WORD does not exist, string-template will print a warning message to STDOUT
+and replace %WORD% with !!WORD!!.
+
+If WORD does exist but is empty, string-template will replace %WORD% with an
+empty string.
+
 ### Tests for this function expect bats to be installed.
 
 Install [bats](https://github.com/bats-core/bats-core) along with
