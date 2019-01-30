@@ -52,7 +52,7 @@ declare rc=0
 # ???: Make DELIM a parameter? DELIM will have to be a single character.
 
 declare DELIM='%'
-#DELIM='[]'
+#DELIM='[]' # for testing syntax error in regex
 declare regex="${DELIM}([^$DELIM]*)$DELIM"
 
 ##############################################################################
@@ -73,10 +73,12 @@ while [[ $s =~ $regex ]]; do
 
   declare value
 
-  value=$(printenv "${BASH_REMATCH[1]}") || {
+  if [[ -v "${BASH_REMATCH[1]}" ]]; then
+    value="${!BASH_REMATCH[1]}"
+  else
     warn "Variable '${BASH_REMATCH[1]}' does not exist in the environment"
     value="!!${BASH_REMATCH[1]}!!"
-  }
+  fi
 
   s=${s//${BASH_REMATCH[0]}/$value}
 done
