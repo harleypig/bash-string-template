@@ -49,11 +49,10 @@ $*
 declare s="$*"
 declare rc=0
 
-# ???: Make DELIM a parameter? DELIM will have to be a single character.
+# ???: Make BST_DELIM a parameter? BST_DELIM will have to be a single character.
 
-declare DELIM='%'
-#DELIM='[]' # for testing syntax error in regex
-declare regex="${DELIM}([^$DELIM]*)$DELIM"
+declare BST_DELIM="${BST_DELIM:-%}"
+declare regex="${BST_DELIM}([^\\$BST_DELIM]*)$BST_DELIM"
 
 ##############################################################################
 

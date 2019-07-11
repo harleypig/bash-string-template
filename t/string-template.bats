@@ -114,3 +114,15 @@ will echo to STDOUT '/path/to/test123'
   assert_success
   assert_output "$expect_mixedvars"
 }
+
+#-----------------------------------------------------------------------
+@test 'set different delimiter' {
+  export BST_DELIM='='
+  export SOMEVAR='hellokitty'
+  input_delimvar='different delim: =SOMEVAR='
+  expect_delimvar='different delim: hellokitty'
+
+  run string-template "$input_delimvar"
+  assert_success
+  assert_output "$expect_delimvar"
+}
